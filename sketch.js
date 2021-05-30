@@ -1,5 +1,6 @@
 var balloon,balloonImage1,balloonImage2;
 // create database and position variable here
+var database, readPosition;
 
 function preload(){
    bg =loadImage("cityImage.png");
@@ -14,11 +15,31 @@ function setup() {
   database=firebase.database();
   createCanvas(1500,700);
 
+  var balloonPosition = database.ref('balloon/height');
+  balloonPosition.on("value", readHeight, showError);
+
   balloon=createSprite(250,450,150,150);
   balloon.addAnimation("hotAirBalloon",balloonImage1);
   balloon.scale=0.5;
 
   textSize(20); 
+}
+
+function updateHeight(x,y){
+  database.ref('balloon/height').set({
+    'x': height.x + x,
+    'y': height.y + y
+  })
+}
+
+function readHeight(data){
+  height=data.val();
+  balloon.x = height.x
+  balloon.y = height.y
+}
+
+function showError(){
+  console.log("Error in writing to the database")
 }
 
 // function to display UI
@@ -36,16 +57,18 @@ function draw() {
     //write code to move air balloon in right direction
   }
   else if(keyDown(UP_ARROW)){
+    updateHeight(0,-10);
     balloon.addAnimation("hotAirBalloon",balloonImage2);
-    //balloon.scale=balloon.scale-0.05;
-    balloon.y = balloon.y-5;
+    balloon.scale=balloon.scale-0.01;
+    //balloon.y = balloon.y-5;
     
     //write code to move air balloon in up direction
   }
   else if(keyDown(DOWN_ARROW)){
+    updateHeight(0,+10);
     balloon.addAnimation("hotAirBalloon",balloonImage2);
-    balloon.y = balloon.y+5;
-    //balloon.scale=balloon.scale+0.05;
+    //balloon.y = balloon.y+5;
+    balloon.scale=balloon.scale+0.01;
     //write code to move air balloon in down direction
   }
 
